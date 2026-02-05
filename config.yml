@@ -1,5 +1,5 @@
 # 用于日志目录命名：logs/<checkpoint>_<timestamp>/
-checkpoint: "INR_SR_Scheme2_V24"
+checkpoint: "Morph-ISR"
 
 # -----------------------
 # Dataset roots (for CLAM slicing/export)
@@ -50,10 +50,7 @@ data_loader:
   val_ratio: 0.1
   test_ratio: 0.2
 
-# -----------------------
-# Model settings (方案2：不依赖DINO/HoVer)
-# train.py 会用这些超参构建 SRModelConfig / SRModel
-# -----------------------
+
 model:
   scale: 4
 

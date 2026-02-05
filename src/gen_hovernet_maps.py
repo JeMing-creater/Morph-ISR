@@ -492,8 +492,12 @@ def process_one_chunk(
 # Main
 # -------------------------
 def main():
+    import yaml
+    from easydict import EasyDict
+    config = EasyDict(yaml.load(open("config.yml", "r", encoding="utf-8"), Loader=yaml.FullLoader))
+    
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out_img_dir", type=str, default="/mnt/liangjm/SpRR_data/")
+    ap.add_argument("--out_img_dir", type=str, default=config.data_loader.out_img_dir)    
     ap.add_argument("--pretrained_model", type=str, default="hovernet_fast-pannuke")
     ap.add_argument("--device", type=str, default="cuda:0")
     ap.add_argument("--batch_size", type=int, default=4)

@@ -1,4 +1,4 @@
-# $S^3$-Diff: Structural Semantic Synergy Diffusion Model for High Credibility Super Resolution of Pathological Images
+# Morph-ISR: Morphology Aware Implicit Super-Resolution Network for Pathological Images
 
 ![overview](./img/overview.png)
 
@@ -13,26 +13,17 @@ git clone https://github.com/mahmoodlab/CLAM.git
 cd CLAM
 
 conda env create -f env.yml
-
-# VFM
-export HF_ENDPOINT="https://hf-mirror.com"
-mkdir -p src/models
-python ./requirements/download_vfm.py
-
 ```
 After installing the CLAM environment, install other packages in this environment.
 ```
 conda activate clam_latest
-pip install -r ./requirements/requirements.txt
-
+pip install -r requirements.txt
 ```
 
-SAM
-user need to download weight vit_b ```sam vit b 01ec64.pth``` from this link: 
+Generate Hovernet Maps: 
 ```
-https://github.com/facebookresearch/segment-anything?tab=readme-ov-file
+python .\src\gen_hovernet_maps.py
 ```
-and then set it into `src/models/`
 
 
 ## Datasets
