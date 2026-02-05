@@ -1,0 +1,137 @@
+# 用于日志目录命名：logs/<checkpoint>_<timestamp>/
+checkpoint: "INR_SR_Scheme2_V24"
+
+# -----------------------
+# Dataset roots (for CLAM slicing/export)
+# train.py 会构建 image_dict 并调用 slic_tool.run_clam_and_export
+# -----------------------
+TCGA_LUAD:
+  root: "/mnt/lwx/pyworkspace/multi-sur/data/TCGA-LUAD/"
+  choose_WSI: 50
+
+TCGA_KIRC:
+  root: "/mnt/lwx/pyworkspace/multi-sur/data/TCGA-KIRC/"
+  choose_WSI: 50
+
+TCGA_LIHC:
+  root: "/mnt/lwx/pyworkspace/multi-sur/data/TCGA-LIHC/"
+  choose_WSI: 50
+
+# -----------------------
+# Data loader / preprocessing settings
+# 这些字段在 train.py 中被直接读取
+# -----------------------
+data_loader:
+  # 是否跳过切片导出（重要：train.py读取的是 data_loader.skip_slicing）
+  skip_slicing: false
+
+  # 输出目录（必须符合 loader.py 读取约定）
+  # out_img_dir/
+  #   hr_png/<slide_id>/patch_xxx.png
+  #   lr_png/<slide_id>/patch_xxx.png
+  #   clinical.tsv
+  out_img_dir: "/mnt/liangjm/SpRR_data/"
+
+  # CLAM 切片导出参数
+  patch_size: 512
+  step_size: 512
+  patch_level: 0
+  down_scale: 4
+  min_tissue_ratio: 0.5
+
+  # 数据加载
+  num_workers: 8
+  pin_memory: true
+
+  # 控制随机性 & split
+  seed: 2025
+  patch_num: 200
+  train_ratio: 0.7
+  val_ratio: 0.1
+  test_ratio: 0.2
+
+# -----------------------
+# Model settings (方案2：不依赖DINO/HoVer)
+# train.py 会用这些超参构建 SRModelConfig / SRModel
+# -----------------------
+model:
+  scale: 4
+
+  feat_ch: 64
+  pe_bands: 10
+  mlp_hidden: 256
+  mlp_depth: 5
+  kernel_heads: 4
+  kernel_size: 7
+  kernel_allow_negative: false
+  kernel_logit_norm: true
+
+  use_refiner: true
+  refiner_base: 64
+  refiner_depth: 5
+
+  infer_chunk: 8192
+
+  # tau：拉长退火，别太快变“硬选择”
+  tau_start: 1.0
+  tau_end: 0.6
+  tau_warm_epochs: 3
+  tau_anneal_epochs: 20
+
+  # gate：别从 8.0 太激进地下来（你原来是 8->1, 500/3000）
+  kernel_gate_tau_start: 4.0
+  kernel_gate_tau_end: 1.2
+  kernel_gate_tau_warm_steps: 1500
+  kernel_gate_tau_anneal_steps: 12000
+
+  # Strategy 1：更强的 dense crop
+  train_crop: 320
+  train_crops_per_img: 2
+  train_crop_chunk: 3072
+  lambda_crop_l1: 1.0
+
+  # hover 只做“训练期加权”，推理不依赖
+  use_hover: true
+  hover_bnd_sigma: 1.8
+  hover_mask_sigma: 1.3
+  hover_bnd_weight: 2.0
+  hover_in_weight: 0.7
+
+  # 关键：把“边界高频”稍微再拉高一点，但别太夸张
+  hover_hp_sigma: 1.0
+  lambda_hover_hp_bnd: 1.00
+  lambda_hover_hp_mask: 0.35
+
+  # 细胞内部别学成 bicubic
+  lambda_mask_l1: 0.65
+
+  # FFT：少量即可（你也不想太重）
+  lambda_fft: 0.05
+  fft_hf_ratio: 0.28
+
+
+# -----------------------
+# Trainer settings
+# -----------------------
+trainer:
+  epochs: 120
+  batch_size: 4
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  grad_clip: 1.0
+  log_every: 50
+  use_amp: true
+
+
+# -----------------------
+# Validation / checkpoint / visualization
+# -----------------------
+validator:
+  do_val: true
+  max_batches: -1
+  metric_for_best: "lpips"
+  best_mode: "min"
+
+  # 每轮验证保存一张随机可视化：HR / LR_up / SR 拼接图
+  save_vis: true
+  vis_subdir: "val_vis"
