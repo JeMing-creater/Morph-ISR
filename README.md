@@ -1,4 +1,4 @@
-# Morph-ISR: Morphology Aware Implicit Super-Resolution Network for Pathological Images
+# Morphology Aware Implicit Super-Resolution Network for Pathological Images
 
 ![overview](./img/overview.png)
 
